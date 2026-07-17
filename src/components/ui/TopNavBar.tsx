@@ -16,7 +16,7 @@ export function TopNavBar() {
           className="font-[family-name:var(--font-jakarta)] font-bold text-lg tracking-tight text-primary"
           aria-label="OneHealth.AI beranda"
         >
-          OneHealth<span className="text-[#00e0af]">.AI</span>
+          OneHealth<span className="text-[#00e0af]">.AI;D</span>
         </Link>
       </div>
     </header>

@@ -21,6 +21,9 @@ interface CaseFormProps {
   isLoading: boolean;
 }
 
+const WA_BOT_NUMBER = '6285176913401';
+const GITHUB_REPO_URL = 'https://github.com/jojohyperbackend-hub/OneHealth.AI';
+
 const DURASI_OPTIONS: { value: DurasiGejala; label: string }[] = [
   { value: 'hari_ini', label: 'Hari ini' },
   { value: '1-3_hari', label: '1–3 hari' },
@@ -182,32 +185,58 @@ export function CaseForm({ onSubmit, isLoading }: CaseFormProps) {
         />
       </div>
 
-      {/* Submit Button */}
-      <button
-        id="btn-submit-analisis"
-        type="submit"
-        disabled={!bolehSubmit}
-        className={cn(
-          'w-full py-4 rounded-full font-bold text-sm uppercase tracking-widest',
-          'transition-all duration-200 flex items-center justify-center gap-2',
-          bolehSubmit
-            ? 'bg-[#08fdc6] text-[#002117] hover:scale-[1.02] active:scale-[0.98] shadow-md cursor-pointer'
-            : 'bg-[#dfe9fa] text-[#727782] cursor-not-allowed opacity-60'
-        )}
-        aria-disabled={!bolehSubmit}
-      >
-        {isLoading ? (
-          <>
-            <span className="material-symbols-outlined animate-spin text-base">progress_activity</span>
-            Menganalisis...
-          </>
-        ) : (
-          <>
-            <span className="material-symbols-outlined text-base">science</span>
-            Mulai Analisis Kasus
-          </>
-        )}
-      </button>
+      {/* Submit Button + tautan eksternal (GitHub, WA bot) */}
+      <div className="flex items-center gap-3">
+        <button
+          id="btn-submit-analisis"
+          type="submit"
+          disabled={!bolehSubmit}
+          className={cn(
+            'flex-1 py-4 rounded-full font-bold text-sm uppercase tracking-widest',
+            'transition-all duration-200 flex items-center justify-center gap-2',
+            bolehSubmit
+              ? 'bg-[#08fdc6] text-[#002117] hover:scale-[1.02] active:scale-[0.98] shadow-md cursor-pointer'
+              : 'bg-[#dfe9fa] text-[#727782] cursor-not-allowed opacity-60'
+          )}
+          aria-disabled={!bolehSubmit}
+        >
+          {isLoading ? (
+            <>
+              <span className="material-symbols-outlined animate-spin text-base">progress_activity</span>
+              Menganalisis...
+            </>
+          ) : (
+            <>
+              <span className="material-symbols-outlined text-base">science</span>
+              Mulai Analisis Kasus
+            </>
+          )}
+        </button>
+
+        <a
+          href={GITHUB_REPO_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Buka repository GitHub OneHealth.AI"
+          title="GitHub"
+          className="shrink-0 w-14 h-14 rounded-full border border-[#c1c7d2] bg-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all overflow-hidden"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/github.png" alt="" className="w-7 h-7 object-contain" />
+        </a>
+
+        <a
+          href={WA_BOT_NUMBER ? `https://wa.me/${WA_BOT_NUMBER}` : 'https://wa.me/'}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Chat via WhatsApp"
+          title="WhatsApp"
+          className="shrink-0 w-14 h-14 rounded-full border border-[#c1c7d2] bg-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all overflow-hidden"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/wa.jpg" alt="" className="w-7 h-7 object-contain" />
+        </a>
+      </div>
     </form>
   );
 }
