@@ -38,6 +38,7 @@ export interface HasilAnalisis {
   kondisi_terkait: KondisiTerkait[]; // apa yang literatur asosiasikan
   ringkasan: string; // Bahasa Indonesia, dari AI
   disclaimer: string; // "ini bukan diagnosis; keputusan di nakes"
+<<<<<<< HEAD
 }// types/case.ts
 // KONTRAK — jangan ubah field tanpa kabari tim dulu (lihat WORKFLOW.md §0.1)
 
@@ -50,6 +51,8 @@ export interface CaseInput {
   riwayat_paparan?: string; // opsional, free text (kontak hewan/makanan/perjalanan/dll)
   catatan_nakes?: string; // opsional, free text
   case_id: string; // idempotency key (lihat PRD §13)
+=======
+>>>>>>> 642f6df9f612226463098e4287d2ef43b52a9c27
 }
 
 export interface JurnalBukti {
