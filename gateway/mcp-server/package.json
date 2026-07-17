@@ -1,0 +1,14 @@
+{
+  "name": "onehealth-mcp-relay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MCP server yang cuma 1 tool: relay pertanyaan pasien ke POST /api/patient/chat (webapp Next.js). Dipakai Hermes Agent di jalur WhatsApp — Hermes TIDAK boleh jawab pakai reasoning-nya sendiri, cuma boleh panggil tool ini dan balikin hasilnya verbatim (PRDv2 §11.2).",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4"
+  }
+}
