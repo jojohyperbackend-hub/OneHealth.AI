@@ -55,7 +55,8 @@ interface CaseRow {
 }
 
 interface BuktiRow {
-  id: string;
+  id: string; // PK internal (UUID) — TIDAK dipakai sebagai JurnalBukti.id
+  external_id: string; // ID artikel Europe PMC — ini yang dipetakan ke JurnalBukti.id
   case_id: string;
   source: string;
   title: string;
@@ -84,7 +85,7 @@ interface PatientRow {
 
 function toJurnalBukti(row: BuktiRow): JurnalBukti {
   return {
-    id: row.id,
+    id: row.external_id,
     source: row.source,
     title: row.title,
     year: row.year,
@@ -159,9 +160,14 @@ export async function saveCaseResult(
   }
 
   if (buktiLolos.length > 0) {
+    // id (PK) sengaja TIDAK di-set di sini — biar DB auto-generate UUID-nya
+    // sendiri (default gen_random_uuid()). external_id = ID artikel Europe
+    // PMC, unik per (case_id, external_id) — BUKAN unik global, jadi artikel
+    // yang sama boleh disitasi di banyak kasus (lihat
+    // supabase/migrations/fix_bukti_pkey.sql).
     const { error: buktiErr } = await supabaseAdmin.from("bukti").insert(
       buktiLolos.map((b) => ({
-        id: b.id,
+        external_id: b.id,
         case_id: inserted.id,
         source: b.source,
         title: b.title,
