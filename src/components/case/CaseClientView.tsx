@@ -12,7 +12,7 @@ import { useCase } from '@/hooks/useCase';
 import type { CaseInput } from '@/types/case';
 
 export function CaseClientView() {
-  const { hasil, isLoading, error, analyze, reset } = useCase();
+  const { hasil, caseId, isLoading, error, analyze, reset } = useCase();
 
   function handleSubmit(formData: Omit<CaseInput, 'case_id'>) {
     analyze(formData);
@@ -64,7 +64,7 @@ export function CaseClientView() {
       {/* Hasil analisis */}
       {hasil && !isLoading && (
         <div className="bg-white rounded-[1.5rem] border border-[#c1c7d2] p-6 md:p-8 shadow-sm">
-          <EvidenceList hasil={hasil} onReset={reset} />
+          <EvidenceList hasil={hasil} caseId={caseId} onReset={reset} />
         </div>
       )}
     </div>

@@ -28,7 +28,7 @@ import { generateCaseId, NO_CACHE_HEADERS } from '@/lib/utils';
 
 // ─── Fixture Imports ───────────────────────────────────────────────────────────
 // Ganti USE_FIXTURE = false saat endpoint asli sudah siap (Phase 2, jam 8)
-const USE_FIXTURE = true;
+const USE_FIXTURE = false;
 
 // Dipakai HANYA kalau body error dari backend gagal di-parse sebagai JSON
 // (mis. network putus total, backend crash sebelum sempat kirim body valid).

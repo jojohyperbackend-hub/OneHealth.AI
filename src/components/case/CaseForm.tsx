@@ -11,7 +11,9 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import type { CaseInput, DurasiGejala, JenisKelamin } from '@/types/case';
+import type { CaseInput } from '@/types/case';
+type DurasiGejala = CaseInput['durasi'];
+type JenisKelamin = CaseInput['jenis_kelamin'];
 import { cn } from '@/lib/utils';
 
 interface CaseFormProps {

@@ -5,7 +5,7 @@
 // retry/fallback) tinggal di lib/index.ts.
 
 import type { JurnalBukti, KondisiTerkait } from "../types/case";
-import type { SummarizeEvidenceResult, EducatePatientResult, ChatPatientResult } from "./ai";
+import type { SummarizeEvidenceResult, EducatePatientResult, ChatPatientResult, DashboardInfoResult } from "./ai";
 
 export interface GuardResult {
   safe: boolean;
@@ -153,6 +153,36 @@ export function verifyEducationOutput(
     if (!refCheck.safe) return refCheck;
   }
   return { safe: true };
+}
+
+// ---------------------------------------------------------------------------
+// Verifikasi output dashboard profil penyakit zoonosis (extractDashboardInfo).
+// Field "habitat" boleh null (jurnal sering tidak menyebutkan), field lain wajib
+// terisi. Semua field teks dicek referensi asing sama seperti Alur 1/2.
+// ---------------------------------------------------------------------------
+
+export function verifyDashboardOutput(
+  result: DashboardInfoResult,
+  bukti: JurnalBukti[]
+): GuardResult {
+  const wajib = [
+    result.summary,
+    result.cara_penyebaran,
+    result.informasi_hewan,
+    result.resiko_hewan,
+    result.treatment,
+  ];
+  for (const f of wajib) {
+    if (!f || typeof f !== "string") {
+      return { safe: false, reason: "Salah satu field dashboard wajib kosong/tidak valid" };
+    }
+  }
+  if (result.habitat !== null && typeof result.habitat !== "string") {
+    return { safe: false, reason: "Field habitat harus string atau null" };
+  }
+
+  const allText = [...wajib, result.habitat ?? ""].join(" ");
+  return verifyNoForeignReferences(allText, bukti);
 }
 
 // ---------------------------------------------------------------------------

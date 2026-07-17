@@ -12,7 +12,15 @@ import { HasilAnalisis } from '@/types/case';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-const RELEVANCE_THRESHOLD = 0.75;
+// Diturunkan dari 0.75 -> 0.15 (2026-07-17, terverifikasi lewat testing
+// terkontrol — lihat DECISIONS.md untuk data lengkap). Skor cosine
+// similarity riil dari qwen3-embedding-8b: dokumen relevan 0.187-0.332,
+// kontrol negatif (topik nggak nyambung sama sekali) 0.076 — pemisahan
+// sinyal/noise bersih. 0.15 duduk di tengah lembah pemisah itu. 0.75
+// (nilai contoh awal di PRD, nggak pernah di-tuning) bikin evidence_status
+// SELALU BUKTI_TIDAK_CUKUP apa pun inputnya, karena skor tertinggi yang
+// pernah terukur cuma ~0.33.
+const RELEVANCE_THRESHOLD = 0.15;
 const DISCLAIMER =
   'Ini bukan diagnosis. Keputusan klinis sepenuhnya di tangan tenaga kesehatan.';
 
@@ -71,7 +79,9 @@ export async function POST(req: NextRequest) {
   }
 
   const input = parsed.data;
-  const query = buildQueryFromCase(input);
+  // await: buildQueryFromCase sekarang manggil extractKeywords (lib/ai.ts)
+  // dulu sebelum bentuk query PMC — lihat lib/retrieval.ts.
+  const query = await buildQueryFromCase(input);
 
   // -- 1. Retrieval (Europe PMC) --------------------------------------------
   let articles;

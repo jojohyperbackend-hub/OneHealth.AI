@@ -1,5 +1,26 @@
+import { extractKeywords } from './ai';
+
 const EUROPE_PMC_BASE =
   'https://www.ebi.ac.uk/europepmc/webservices/rest/search';
+
+// Batas keyword hasil ekstraksi AI yang boleh nempel ke query PMC (PRD §6.1
+// "keyword divalidasi" + §13 — jangan pernah masukin free-text mentah nakes
+// ke URL, cegah kebocoran PII/data sensitif lewat query param).
+const MAX_KEYWORDS = 8;
+const MAX_TERM_LENGTH = 40; // istilah medis pendek — kalau lebih panjang dari
+// ini, kemungkinan besar model ngasih kalimat bukan istilah, buang.
+// Hanya huruf/angka/spasi/tanda hubung — sama kayak sanitasi buildQueryFromCase
+// di bawah, sengaja pola yang sama, bukan aturan baru.
+const TERM_CHARSET = /^[\p{L}\p{N}\s-]+$/u;
+
+function validateKeywords(terms: unknown): string[] {
+  if (!Array.isArray(terms)) return [];
+  return terms
+    .filter((t): t is string => typeof t === 'string')
+    .map((t) => t.trim())
+    .filter((t) => t.length > 0 && t.length <= MAX_TERM_LENGTH && TERM_CHARSET.test(t))
+    .slice(0, MAX_KEYWORDS);
+}
 
 export interface EuropePMCArticle {
   id: string;
@@ -37,14 +58,34 @@ interface EuropePMCRawResponse {
   };
 }
 
-export function buildQueryFromCase(input: {
+// Perilaku lama (pra-keyword-extraction) — sekarang jadi FALLBACK, dipakai
+// kalau extractKeywords gagal/timeout/kosong (graceful degradation §3.4).
+function sanitizeRawText(gejala: string, riwayatPaparan?: string): string {
+  const raw = [gejala, riwayatPaparan ?? ''].filter(Boolean).join(' ');
+  return raw.replace(/[^\p{L}\p{N}\s,.-]/gu, '').trim();
+}
+
+// PRD §6.1 step 3: query dibentuk dari istilah medis Inggris kanonik hasil
+// extractKeywords (lib/ai.ts), BUKAN dari teks mentah nakes langsung — korpus
+// Europe PMC berbahasa Inggris, dan gejala Bahasa Indonesia yang ditembak
+// mentah balikin 0 hasil (terverifikasi, lihat DECISIONS.md). Kalau
+// ekstraksi AI gagal, turun ke sanitizeRawText (masih jalan minimal untuk
+// input Inggris) — jangan hard-fail seluruh /api/case/analyze gara-gara satu
+// langkah opsional ini.
+export async function buildQueryFromCase(input: {
   gejala: string;
   riwayat_paparan?: string;
-}): string {
-  const raw = [input.gejala, input.riwayat_paparan ?? '']
-    .filter(Boolean)
-    .join(' ');
-  return raw.replace(/[^\p{L}\p{N}\s,.-]/gu, '').trim();
+}): Promise<string> {
+  const keywordResult = await extractKeywords(input.gejala, input.riwayat_paparan);
+
+  if (keywordResult.ai_status === 'success') {
+    const validTerms = validateKeywords(keywordResult.data.terms);
+    if (validTerms.length > 0) {
+      return validTerms.join(' ');
+    }
+  }
+
+  return sanitizeRawText(input.gejala, input.riwayat_paparan);
 }
 
 export async function searchEuropePMC(

@@ -226,6 +226,50 @@ export async function embedTexts(
 }
 
 // ---------------------------------------------------------------------------
+// PUBLIC: bentuk keyword pencarian Europe PMC dari data kasus (PRD §6.1 step
+// 3 — "deterministik + boleh dibantu AI menyusun keyword, TAPI keyword
+// divalidasi"). Dipanggil dari lib/retrieval.ts SEBELUM query PMC dibentuk.
+//
+// PENTING: output di sini adalah ISTILAH MEDIS INGGRIS KANONIK (gaya MeSH),
+// BUKAN terjemahan kalimat. Korpus Europe PMC berbahasa Inggris — gejala
+// Bahasa Indonesia yang ditembak mentah ke situ balikin 0 hasil (terverifikasi
+// lewat testing manual, lihat DECISIONS.md). "demam tinggi" harus jadi
+// "fever", bukan "demam tinggi" yang diterjemahkan literal jadi "high fever"
+// kalau itu bukan istilah baku — modelnya diarahkan mikir istilah indeks,
+// bukan nerjemahin kalimat.
+//
+// Validasi hasil (jumlah term, karakter, panjang) ada di sisi PEMANGGIL
+// (lib/retrieval.ts), BUKAN di sini — fungsi ini cuma satu pintu panggilan AI,
+// konsisten sama pola summarizeEvidence/educatePatient/chatPatient di bawah.
+// ---------------------------------------------------------------------------
+
+export interface ExtractKeywordsResult {
+  terms: string[];
+}
+
+export async function extractKeywords(
+  gejala: string,
+  riwayatPaparan?: string
+): Promise<AIWrappedResponse<ExtractKeywordsResult>> {
+  const systemPrompt = `Kamu mengekstrak ISTILAH MEDIS INGGRIS STANDAR (gaya MeSH/PubMed) dari deskripsi gejala klinis, untuk dipakai sebagai query pencarian ke Europe PMC (database jurnal medis berbahasa Inggris).
+
+ATURAN MUTLAK:
+- Output WAJIB istilah medis Inggris kanonik/baku, BUKAN terjemahan kalimat literal. Contoh: "demam tinggi" -> "fever", "sesak napas" -> "dyspnea", "batuk kering" -> "dry cough", "nyeri dada" -> "chest pain", "riwayat kontak unggas" -> "poultry exposure".
+- Kalau input sudah Bahasa Inggris, tetap normalisasi ke istilah baku (jangan asal salin kalimat apa adanya).
+- Ekstrak HANYA istilah klinis relevan (gejala, kondisi terkait, faktor paparan). DILARANG memasukkan kata umum non-medis, nama, atau informasi yang bukan istilah medis.
+- Maksimal 8 istilah, minimal 1. Tiap istilah pendek (1-3 kata), bukan kalimat.
+- Jawab HANYA dengan JSON valid sesuai skema:
+{ "terms": ["term1", "term2", ...] }`;
+
+  const userPrompt = JSON.stringify({
+    gejala,
+    riwayat_paparan: riwayatPaparan ?? null,
+  });
+
+  return runLLM<ExtractKeywordsResult>(systemPrompt, userPrompt);
+}
+
+// ---------------------------------------------------------------------------
 // PUBLIC: Alur 1 — rangkum bukti + kondisi terkait dari jurnal yang SUDAH
 // lolos ambang (dipanggil dari orchestration setelah lib/embed.ts filter).
 // Guardrail verifikasi lanjut ada di lib/guardrail.ts — fungsi ini HANYA
@@ -272,6 +316,53 @@ ATURAN MUTLAK:
   });
 
   return runLLM<SummarizeEvidenceResult>(systemPrompt, userPrompt);
+}
+
+// ---------------------------------------------------------------------------
+// PUBLIC: Dashboard profil penyakit zoonosis — susun 6 field terstruktur
+// (summary, cara penyebaran, info hewan, habitat, resiko hewan, treatment)
+// dari bukti[] jurnal yang SUDAH lolos ambang (sama seperti summarizeEvidence,
+// dipanggil setelah retrieval, bukan menggantikan ringkasan Alur 1).
+// ---------------------------------------------------------------------------
+
+export interface DashboardInfoResult {
+  summary: string;
+  cara_penyebaran: string;
+  informasi_hewan: string;
+  habitat: string | null;
+  resiko_hewan: string;
+  treatment: string;
+}
+
+export async function extractDashboardInfo(
+  bukti: JurnalBukti[]
+): Promise<AIWrappedResponse<DashboardInfoResult>> {
+  const systemPrompt = `Kamu menyusun profil ringkas penyakit zoonosis untuk dashboard nakes, HANYA berdasarkan jurnal yang diberikan.
+
+ATURAN MUTLAK:
+- Kamu HANYA merangkum apa yang ADA di jurnal yang diberikan. DILARANG menambah klaim, angka, atau fakta yang tidak ada di jurnal tersebut.
+- Kalau jurnal tidak menyebutkan info untuk suatu field (terutama "habitat"), isi field itu dengan null, JANGAN mengarang.
+- Istilah medis/DOI/angka/tahun tetap apa adanya, sisanya Bahasa Indonesia.
+- Jawab HANYA dengan JSON valid sesuai skema:
+{
+  "summary": "string, rangkuman umum penyakit",
+  "cara_penyebaran": "string, cara penularan/transmisi",
+  "informasi_hewan": "string, hewan yang berkaitan sebagai sumber/vektor",
+  "habitat": "string atau null, habitat hewan terkait kalau disebutkan jurnal",
+  "resiko_hewan": "string, tingkat/jenis risiko dari hewan terkait",
+  "treatment": "string, penanganan/perawatan yang disebutkan jurnal"
+}`;
+
+  const userPrompt = JSON.stringify({
+    jurnal_tersedia: bukti.map((b) => ({
+      id: b.id,
+      title: b.title,
+      year: b.year,
+      snippet: b.snippet,
+    })),
+  });
+
+  return runLLM<DashboardInfoResult>(systemPrompt, userPrompt);
 }
 
 // ---------------------------------------------------------------------------

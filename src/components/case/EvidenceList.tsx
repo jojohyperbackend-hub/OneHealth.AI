@@ -12,11 +12,13 @@
  * Visual berbeda — tenang, informatif, bukan merah menyala.
  */
 
+import Link from 'next/link';
 import type { HasilAnalisis, JurnalBukti, KondisiTerkait } from '@/types/case';
 import { cn, deriveEvidenceUiState, formatRelevanceScore } from '@/lib/utils';
 
 interface EvidenceListProps {
   hasil: HasilAnalisis;
+  caseId: string | null;
   onReset: () => void;
 }
 
@@ -197,7 +199,7 @@ function ErrorState({
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export function EvidenceList({ hasil, onReset }: EvidenceListProps) {
+export function EvidenceList({ hasil, caseId, onReset }: EvidenceListProps) {
   const { ringkasan, kondisi_terkait, bukti, disclaimer } = hasil;
   const uiState = deriveEvidenceUiState(hasil);
 
@@ -240,13 +242,23 @@ export function EvidenceList({ hasil, onReset }: EvidenceListProps) {
             Hasil Tinjauan Literatur
           </h2>
         </div>
-        <button
-          onClick={onReset}
-          id="btn-analisis-baru"
-          className="shrink-0 px-4 py-2 rounded-full border border-[#c1c7d2] text-sm text-[#414751] font-semibold hover:bg-[#f8f9ff] transition-all"
-        >
-          Kasus Baru
-        </button>
+        <div className="shrink-0 flex items-center gap-2">
+          {caseId && (
+            <Link
+              href={`/case/dashboard/${caseId}`}
+              className="px-4 py-2 rounded-full bg-[#00559a] text-white text-sm font-semibold hover:scale-105 active:scale-95 transition-all"
+            >
+              Buka Dashboard
+            </Link>
+          )}
+          <button
+            onClick={onReset}
+            id="btn-analisis-baru"
+            className="px-4 py-2 rounded-full border border-[#c1c7d2] text-sm text-[#414751] font-semibold hover:bg-[#f8f9ff] transition-all"
+          >
+            Kasus Baru
+          </button>
+        </div>
       </div>
 
       {/* Kondisi Terkait — tiap chip bersitasi ke bukti (§3.1) */}

@@ -129,6 +129,15 @@ export async function saveCaseResult(
   const { data: inserted, error: insertErr } = await supabaseAdmin
     .from("cases")
     .insert({
+      // FIX (case_id gap): id = client_case_id, BUKAN dibiarkan auto-generate.
+      // Alasan: HasilAnalisis (kontrak types/case.ts) sengaja TIDAK membawa
+      // balik case_id ke FE, jadi satu-satunya cara FE tetap tau `cases.id`
+      // buat dipanggil ulang di /api/patient/educate adalah kalau id-nya
+      // SAMA PERSIS dengan case_id yang FE generate sendiri sebelum submit
+      // (lihat useCase.ts — case_id itu sudah dilacak client-side, tinggal
+      // dipakai). Konsekuensi: kolom client_case_id di bawah jadi selalu
+      // sama dengan id, tapi dibiarkan (bukan kolom yang salah, cuma redundan).
+      id: input.case_id,
       client_case_id: input.case_id,
       gejala: input.gejala,
       durasi: input.durasi,
