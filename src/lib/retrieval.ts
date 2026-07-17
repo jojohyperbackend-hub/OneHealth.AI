@@ -18,6 +18,25 @@ export class RetrievalError extends Error {
   }
 }
 
+// Shape mentah dari Europe PMC REST API (resultType=core) — hanya field
+// yang benar-benar dipakai, sisanya diabaikan TypeScript secara otomatis.
+interface EuropePMCRawResult {
+  id?: string | number;
+  title?: string;
+  abstractText?: string;
+  pubYear?: string | number;
+  doi?: string;
+  fullTextUrlList?: {
+    fullTextUrl?: Array<{ url?: string }>;
+  };
+}
+
+interface EuropePMCRawResponse {
+  resultList?: {
+    result?: EuropePMCRawResult[];
+  };
+}
+
 export function buildQueryFromCase(input: {
   gejala: string;
   riwayat_paparan?: string;
@@ -52,8 +71,8 @@ export async function searchEuropePMC(
 
     if (!res.ok) throw new RetrievalError(`Europe PMC returned ${res.status}`);
 
-    const json = await res.json();
-    const results: any[] = json?.resultList?.result ?? [];
+    const json = (await res.json()) as EuropePMCRawResponse;
+    const results = json?.resultList?.result ?? [];
 
     return results
       .filter(
@@ -62,7 +81,7 @@ export async function searchEuropePMC(
       .map((r) => ({
         id: String(r.id),
         title: r.title ?? 'Untitled',
-        abstractText: stripHtml(r.abstractText),
+        abstractText: stripHtml(r.abstractText as string),
         year: r.pubYear ? Number(r.pubYear) : null,
         doi: r.doi ?? null,
         url: r.fullTextUrlList?.fullTextUrl?.[0]?.url ?? null,

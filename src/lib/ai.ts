@@ -42,6 +42,13 @@ interface OpenRouterEmbeddingBody {
 
 // ---------------------------------------------------------------------------
 // Shared response wrapper (PRD §9)
+//
+// PENTING: ini discriminated union, BUKAN interface dengan field independen.
+// Dengan union, `if (result.ai_status === 'error')` otomatis nge-narrow
+// `data` jadi `null` dan `ai_error_code` jadi `AIErrorCode` (non-null) di
+// branch itu — TypeScript bisa infer sendiri tanpa perlu `!` di pemanggil.
+// JANGAN diubah balik jadi interface biasa, itu balikin masalah type-narrowing
+// di semua route yang consume wrapper ini (lib/embed.ts, route.ts, dst).
 // ---------------------------------------------------------------------------
 
 export type AIErrorCode =
@@ -51,11 +58,9 @@ export type AIErrorCode =
   | "AI_OUT_OF_CONTEXT"
   | "AI_QUOTA_EXCEEDED";
 
-export interface AIWrappedResponse<T> {
-  ai_status: "success" | "error";
-  ai_error_code: AIErrorCode | null;
-  data: T | null;
-}
+export type AIWrappedResponse<T> =
+  | { ai_status: "success"; ai_error_code: null; data: T }
+  | { ai_status: "error"; ai_error_code: AIErrorCode; data: null };
 
 function ok<T>(data: T): AIWrappedResponse<T> {
   return { ai_status: "success", ai_error_code: null, data };
