@@ -2,6 +2,7 @@ import { educatePatient } from '@/lib/ai';
 import { verifyEducationOutput } from '@/lib/guardrail';
 import {
   getCaseById,
+  getPatientEducation,
   upsertPatient,
   savePatientEducation,
   markCaseStatus,
@@ -161,4 +162,25 @@ export async function POST(req: NextRequest) {
   }
 
   return respond(result);
+}
+
+/**
+ * GET /api/patient/educate?case_id=xxx
+ * Ambil materi edukasi yang SUDAH tersimpan (bukan generate baru). Dipakai
+ * app/patient/[caseId]/page.tsx buat render halaman pasien pas dibuka —
+ * materi edukasi harusnya sudah dibuat nakes lewat POST di atas sebelum
+ * pasien buka link ini.
+ */
+export async function GET(req: NextRequest) {
+  const caseId = req.nextUrl.searchParams.get('case_id');
+  if (!caseId || !z.string().uuid().safeParse(caseId).success) {
+    return errorRespond('INVALID_INPUT', 400);
+  }
+
+  const edukasi = await getPatientEducation(caseId);
+  if (!edukasi) {
+    return errorRespond('NOT_FOUND', 404);
+  }
+
+  return respond(edukasi);
 }
