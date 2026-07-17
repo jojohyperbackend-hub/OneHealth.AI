@@ -32,6 +32,11 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# gateway — proses Node terpisah di VPS (lihat gateway/mcp-server/README.md)
+/gateway/mcp-server/node_modules
+/gateway/**/session
 
 # vercel
 .vercel
@@ -39,3 +44,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.context
+.claude
+*.md
+!README.md

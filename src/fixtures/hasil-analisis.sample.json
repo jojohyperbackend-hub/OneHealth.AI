@@ -1,0 +1,53 @@
+{
+  "ai_status": "success",
+  "ai_error_code": null,
+  "evidence_status": "CUKUP",
+  "bukti": [
+    {
+      "id": "b1",
+      "source": "Europe PMC",
+      "title": "Clinical characteristics of COVID-19 patients with hypertension comorbidity in Southeast Asia",
+      "year": 2022,
+      "doi": "10.1016/j.lancetreg.2022.100123",
+      "url": "https://europepmc.org/article/MED/12345678",
+      "relevance_score": 0.91,
+      "snippet": "Patients with hypertension and COVID-19 infection showed a 2.3-fold increased risk of progression to mechanical ventilation compared to normotensive counterparts. Fever above 38.5°C combined with non-productive cough was present in 78% of severe cases."
+    },
+    {
+      "id": "b2",
+      "source": "Europe PMC",
+      "title": "Oxygen saturation thresholds for hospital admission in febrile adult patients",
+      "year": 2021,
+      "doi": "10.1136/bmj.2021.n1234",
+      "url": "https://europepmc.org/article/MED/87654321",
+      "relevance_score": 0.87,
+      "snippet": "SpO2 below 95% at rest in adults presenting with acute febrile illness represents a clinically significant threshold for escalation of care. Early intervention at this threshold reduced ICU admission rates by 34% in a multicenter RCT."
+    },
+    {
+      "id": "b3",
+      "source": "Europe PMC",
+      "title": "Differential diagnosis of acute respiratory infection in primary care settings",
+      "year": 2023,
+      "doi": "10.1093/cid/ciad456",
+      "url": "https://europepmc.org/article/MED/11223344",
+      "relevance_score": 0.82,
+      "snippet": "Atypical pneumonia should be considered in adults with a duration of symptoms exceeding 7 days with dry cough and low-grade fever. Influenza co-infection remains prevalent and should be ruled out via rapid antigen testing."
+    }
+  ],
+  "kondisi_terkait": [
+    {
+      "kondisi": "COVID-19 Derajat Sedang-Berat",
+      "dasar_jurnal": ["b1", "b2"]
+    },
+    {
+      "kondisi": "Pneumonia Atipikal",
+      "dasar_jurnal": ["b3"]
+    },
+    {
+      "kondisi": "Influenza dengan Komplikasi",
+      "dasar_jurnal": ["b3"]
+    }
+  ],
+  "ringkasan": "Berdasarkan tinjauan literatur dari Europe PMC, kombinasi gejala demam tinggi (>38.5°C), batuk non-produktif, dan saturasi oksigen di bawah 95% pada pria dewasa dengan riwayat hipertensi berkorelasi signifikan dengan presentasi COVID-19 derajat sedang-berat. Studi kohort di Asia Tenggara mengonfirmasi bahwa komorbiditas hipertensi meningkatkan risiko progresi ke ventilasi mekanik sebesar 2.3x lipat. Mekanisme biologis yang mendasari: hipertensi menyebabkan upregulasi reseptor ACE2 di endotel paru, sehingga meningkatkan tropisme SARS-CoV-2.",
+  "disclaimer": "Hasil ini bukan diagnosis medis. Seluruh kesimpulan di atas bersumber dari literatur peer-reviewed yang disitasi dan hanya bertujuan mendukung pertimbangan klinis nakes. Keputusan tatalaksana sepenuhnya berada di tangan tenaga kesehatan yang berwenang."
+}
