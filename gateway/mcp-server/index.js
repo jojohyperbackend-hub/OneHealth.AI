@@ -25,6 +25,25 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { randomUUID } from 'node:crypto';
+import { readFileSync, existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+
+// Load .env manual (tanpa dependency `dotenv`) — Node tidak auto-baca .env,
+// dan cara Hermes memanggil proses ini (env apa yang di-inherit) tidak bisa
+// diasumsikan, jadi server ini WAJIB bisa mandiri baca file .env sendiri.
+function loadDotEnv() {
+  const envPath = join(dirname(fileURLToPath(import.meta.url)), '.env');
+  if (!existsSync(envPath)) return;
+  const text = readFileSync(envPath, 'utf8');
+  for (const line of text.split(/\r?\n/)) {
+    const match = line.match(/^([A-Z0-9_]+)=(.*)$/);
+    if (match && !(match[1] in process.env)) {
+      process.env[match[1]] = match[2].trim();
+    }
+  }
+}
+loadDotEnv();
 
 const BACKEND_URL = process.env.ONEHEALTH_BACKEND_URL;
 const WEBHOOK_SECRET = process.env.HERMES_WEBHOOK_SECRET;
