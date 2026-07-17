@@ -1,0 +1,9 @@
+{
+  "ai_status": "success",
+  "ai_error_code": null,
+  "evidence_status": "BUKTI_TIDAK_CUKUP",
+  "bukti": [],
+  "kondisi_terkait": [],
+  "ringkasan": "",
+  "disclaimer": "Sistem tidak menemukan bukti literatur yang cukup kuat (di atas ambang batas relevansi) untuk kombinasi gejala yang diinput. Ini bukan berarti kondisi pasien tidak serius — melainkan literatur yang tersedia belum memadai untuk mendukung analisis. Harap lakukan pemeriksaan klinis langsung."
+}
