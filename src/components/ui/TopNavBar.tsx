@@ -8,7 +8,7 @@
 
 import Link from 'next/link';
 
-const WA_BOT_NUMBER = '6285176913401';
+const WA_BOT_NUMBER = '';
 const GITHUB_REPO_URL = 'https://github.com/jojohyperbackend-hub/OneHealth.AI';
 
 export function TopNavBar() {
